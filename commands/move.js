@@ -13,26 +13,24 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    await interaction.deferReply();
-
     if (!hasModRole(interaction.member)) {
-      return interaction.editReply("❌ You need the **Moderator** role to use this.");
+      return interaction.reply({ content: "❌ You need the **Moderator** role to use this.", ephemeral: true });
     }
 
     const target = interaction.options.getUser("user");
     const pos = interaction.options.getInteger("position");
-    const lb = await load();
+    const lb = load();
 
     const idx = lb.findIndex(e => e.id === target.id);
     if (idx === -1) {
-      return interaction.editReply(`⚠️ ${target.username} is not on the leaderboard.`);
+      return interaction.reply({ content: `⚠️ ${target.username} is not on the leaderboard.`, ephemeral: true });
     }
 
     const clampedPos = Math.min(pos, lb.length);
     const [entry] = lb.splice(idx, 1);
     lb.splice(clampedPos - 1, 0, entry);
-    await save(lb);
+    save(lb);
 
-    await interaction.editReply(`✅ Moved **${target.username}** to rank #${clampedPos}.`);
+    await interaction.reply(`✅ Moved **${target.username}** to rank #${clampedPos}.`);
   }
 };

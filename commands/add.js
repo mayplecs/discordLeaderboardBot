@@ -10,22 +10,20 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    await interaction.deferReply();
-
     if (!hasModRole(interaction.member)) {
-      return interaction.editReply("❌ You need the **Moderator** role to use this.");
+      return interaction.reply({ content: "❌ You need the **Moderator** role to use this.", ephemeral: true });
     }
 
     const target = interaction.options.getUser("user");
-    const lb = await load();
+    const lb = load();
 
     if (lb.find(e => e.id === target.id)) {
-      return interaction.editReply(`⚠️ ${target.username} is already on the leaderboard.`);
+      return interaction.reply({ content: `⚠️ ${target.username} is already on the leaderboard.`, ephemeral: true });
     }
 
     lb.push({ id: target.id, name: target.username });
-    await save(lb);
+    save(lb);
 
-    await interaction.editReply(`✅ Added **${target.username}** to the leaderboard at position #${lb.length}.`);
+    await interaction.reply(`✅ Added **${target.username}** to the leaderboard at position #${lb.length}.`);
   }
 };

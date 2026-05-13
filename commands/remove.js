@@ -10,23 +10,21 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    await interaction.deferReply();
-
     if (!hasModRole(interaction.member)) {
-      return interaction.editReply("❌ You need the **Moderator** role to use this.");
+      return interaction.reply({ content: "❌ You need the **Moderator** role to use this.", ephemeral: true });
     }
 
     const target = interaction.options.getUser("user");
-    const lb = await load();
+    const lb = load();
 
     const idx = lb.findIndex(e => e.id === target.id);
     if (idx === -1) {
-      return interaction.editReply(`⚠️ ${target.username} is not on the leaderboard.`);
+      return interaction.reply({ content: `⚠️ ${target.username} is not on the leaderboard.`, ephemeral: true });
     }
 
     lb.splice(idx, 1);
-    await save(lb);
+    save(lb);
 
-    await interaction.editReply(`✅ Removed **${target.username}** from the leaderboard.`);
+    await interaction.reply(`✅ Removed **${target.username}** from the leaderboard.`);
   }
 };

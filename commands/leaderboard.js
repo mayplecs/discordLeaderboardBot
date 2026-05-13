@@ -7,12 +7,10 @@ module.exports = {
     .setDescription("View the leaderboard"),
 
   async execute(interaction) {
-    await interaction.deferReply();
-
-    const lb = await load();
+    const lb = load();
 
     if (lb.length === 0) {
-      return interaction.editReply("The leaderboard is empty. Add users with `/add`.");
+      return interaction.reply("The leaderboard is empty. Add users with `/add`.");
     }
 
     const medals = ["🥇", "🥈", "🥉"];
@@ -26,6 +24,6 @@ module.exports = {
       .setColor(0xf5c518)
       .setTimestamp();
 
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] });
   }
 };
