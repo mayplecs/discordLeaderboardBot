@@ -1,15 +1,57 @@
-const fs = require("fs");
-const path = require("path");
+const https = require("https");
 
-const FILE = path.join(__dirname, "..", "leaderboard.json");
+const BIN_ID = process.env.JSONBIN_ID;
+const API_KEY = process.env.JSONBIN_KEY;
+const BASE_URL = "api.jsonbin.io";
 
-function load() {
-  if (!fs.existsSync(FILE)) return [];
-  return JSON.parse(fs.readFileSync(FILE, "utf8"));
+function request(method, path, body = null) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: BASE_URL,
+      path,
+      method,
+      headers: {
+        "X-Master-Key": API_KEY,
+        "Content-Type": "application/json",
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          reject(new Error("Failed to parse response"));
+        }
+      });
+    });
+
+    req.on("error", reject);
+    if (body) req.write(JSON.stringify(body));
+    req.end();
+  });
 }
 
-function save(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+async function load() {
+  try {
+    const res = await request("GET", `/v3/b/${BIN_ID}/latest`);
+    const entries = res.record?.entries;
+    return Array.isArray(entries) ? entries : [];
+  } catch (err) {
+    console.error("JSONBin load error:", err.message);
+    return [];
+  }
+}
+
+async function save(entries) {
+  try {
+    await request("PUT", `/v3/b/${BIN_ID}`, { entries });
+  } catch (err) {
+    console.error("JSONBin save error:", err.message);
+    throw err;
+  }
 }
 
 function hasModRole(member) {
