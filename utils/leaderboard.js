@@ -1,10 +1,14 @@
 const { MongoClient } = require("mongodb");
 
-const client = new MongoClient(process.env.MONGODB_URI);
+let client;
 let db;
 
 async function connect() {
   if (!db) {
+    client = new MongoClient(process.env.MONGODB_URI, {
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+    });
     await client.connect();
     db = client.db("leaderbot");
   }
@@ -12,18 +16,29 @@ async function connect() {
 }
 
 async function load() {
-  const database = await connect();
-  const doc = await database.collection("leaderboard").findOne({ _id: "main" });
-  return doc ? doc.entries : [];
+  try {
+    const database = await connect();
+    const doc = await database.collection("leaderboard").findOne({ _id: "main" });
+    if (!doc || !Array.isArray(doc.entries)) return [];
+    return doc.entries;
+  } catch (err) {
+    console.error("MongoDB load error:", err.message);
+    return [];
+  }
 }
 
 async function save(entries) {
-  const database = await connect();
-  await database.collection("leaderboard").updateOne(
-    { _id: "main" },
-    { $set: { entries } },
-    { upsert: true }
-  );
+  try {
+    const database = await connect();
+    await database.collection("leaderboard").updateOne(
+      { _id: "main" },
+      { $set: { entries } },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.error("MongoDB save error:", err.message);
+    throw err;
+  }
 }
 
 function hasModRole(member) {
