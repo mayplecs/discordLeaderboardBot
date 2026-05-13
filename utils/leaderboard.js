@@ -1,15 +1,29 @@
-const fs = require("fs");
-const path = require("path");
+const { MongoClient } = require("mongodb");
 
-const FILE = path.join(__dirname, "..", "leaderboard.json");
+const client = new MongoClient(process.env.MONGODB_URI);
+let db;
 
-function load() {
-  if (!fs.existsSync(FILE)) return [];
-  return JSON.parse(fs.readFileSync(FILE, "utf8"));
+async function connect() {
+  if (!db) {
+    await client.connect();
+    db = client.db("leaderbot");
+  }
+  return db;
 }
 
-function save(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+async function load() {
+  const database = await connect();
+  const doc = await database.collection("leaderboard").findOne({ _id: "main" });
+  return doc ? doc.entries : [];
+}
+
+async function save(entries) {
+  const database = await connect();
+  await database.collection("leaderboard").updateOne(
+    { _id: "main" },
+    { $set: { entries } },
+    { upsert: true }
+  );
 }
 
 function hasModRole(member) {
