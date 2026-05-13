@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 
 let client;
 let db;
@@ -6,8 +6,11 @@ let db;
 async function connect() {
   if (!db) {
     client = new MongoClient(process.env.MONGODB_URI, {
-      tls: true,
-      tlsAllowInvalidCertificates: false,
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      }
     });
     await client.connect();
     db = client.db("leaderbot");
