@@ -13,8 +13,10 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    await interaction.deferReply();
+
     if (!hasModRole(interaction.member)) {
-      return interaction.reply({ content: "❌ You need the **Moderator** role to use this.", ephemeral: true });
+      return interaction.editReply("❌ You need the **Moderator** role to use this.");
     }
 
     const target = interaction.options.getUser("user");
@@ -23,7 +25,7 @@ module.exports = {
 
     const idx = lb.findIndex(e => e.id === target.id);
     if (idx === -1) {
-      return interaction.reply({ content: `⚠️ ${target.username} is not on the leaderboard.`, ephemeral: true });
+      return interaction.editReply(`⚠️ ${target.username} is not on the leaderboard.`);
     }
 
     const clampedPos = Math.min(pos, lb.length);
@@ -31,6 +33,6 @@ module.exports = {
     lb.splice(clampedPos - 1, 0, entry);
     await save(lb);
 
-    await interaction.reply(`✅ Moved **${target.username}** to rank #${clampedPos}.`);
+    await interaction.editReply(`✅ Moved **${target.username}** to rank #${clampedPos}.`);
   }
 };
