@@ -15,14 +15,14 @@ module.exports = {
     }
 
     const target = interaction.options.getUser("user");
-    const lb = load();
+    const lb = await load();
 
     if (lb.find(e => e.id === target.id)) {
       return interaction.reply({ content: `⚠️ ${target.username} is already on the leaderboard.`, ephemeral: true });
     }
 
     lb.push({ id: target.id, name: target.username });
-    save(lb);
+    await save(lb);
 
     await interaction.reply(`✅ Added **${target.username}** to the leaderboard at position #${lb.length}.`);
   }

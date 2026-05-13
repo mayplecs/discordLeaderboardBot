@@ -15,7 +15,7 @@ module.exports = {
     }
 
     const target = interaction.options.getUser("user");
-    const lb = load();
+    const lb = await load();
 
     const idx = lb.findIndex(e => e.id === target.id);
     if (idx === -1) {
@@ -23,7 +23,7 @@ module.exports = {
     }
 
     lb.splice(idx, 1);
-    save(lb);
+    await save(lb);
 
     await interaction.reply(`✅ Removed **${target.username}** from the leaderboard.`);
   }

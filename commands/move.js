@@ -19,17 +19,17 @@ module.exports = {
 
     const target = interaction.options.getUser("user");
     const pos = interaction.options.getInteger("position");
-    const lb = load();
+    const lb = await load();
 
     const idx = lb.findIndex(e => e.id === target.id);
     if (idx === -1) {
       return interaction.reply({ content: `⚠️ ${target.username} is not on the leaderboard.`, ephemeral: true });
     }
 
-    const clampedPos = Math.min(pos, lb.length); // can't go beyond last place
+    const clampedPos = Math.min(pos, lb.length);
     const [entry] = lb.splice(idx, 1);
     lb.splice(clampedPos - 1, 0, entry);
-    save(lb);
+    await save(lb);
 
     await interaction.reply(`✅ Moved **${target.username}** to rank #${clampedPos}.`);
   }

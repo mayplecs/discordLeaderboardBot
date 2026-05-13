@@ -7,7 +7,7 @@ module.exports = {
     .setDescription("View the leaderboard"),
 
   async execute(interaction) {
-    const lb = load();
+    const lb = await load();
 
     if (lb.length === 0) {
       return interaction.reply("The leaderboard is empty. Add users with `/add`.");
