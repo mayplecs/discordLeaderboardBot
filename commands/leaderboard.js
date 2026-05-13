@@ -15,13 +15,22 @@ module.exports = {
     }
 
     const medals = ["🥇", "🥈", "🥉"];
-    const description = lb
-      .map((entry, i) => `${medals[i] || `**#${i + 1}**`} <@${entry.id}> — ${entry.name}`)
-      .join("\n");
+
+    const lines = await Promise.all(lb.map(async (entry, i) => {
+      let displayName = entry.name;
+      try {
+        const member = await interaction.guild.members.fetch(entry.id);
+        displayName = member.displayName;
+      } catch {
+        // user left the server or can't be fetched, fall back to stored name
+      }
+      const rank = medals[i] || `**#${i + 1}**`;
+      return `${rank} ${displayName}`;
+    }));
 
     const embed = new EmbedBuilder()
       .setTitle("🏆 Leaderboard")
-      .setDescription(description)
+      .setDescription(lines.join("\n"))
       .setColor(0xf5c518)
       .setTimestamp();
 
