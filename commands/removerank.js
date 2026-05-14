@@ -8,7 +8,7 @@ module.exports = {
     .addIntegerOption(opt =>
       opt.setName("position").setDescription("Rank number to remove (e.g. 3)").setRequired(true).setMinValue(1)
     ),
-
+  //
   async execute(interaction) {
     await interaction.deferReply();
 
